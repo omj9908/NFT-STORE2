@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head> 
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFT 리스팅</title>
+    <style>
+        /* 헤더 */
+        header {
+            width:100%;
+            height: 80px;
+        }
+
+        header > div {
+            text-align:center;
+            padding-top:20px;
+            font-family:'Merienda', cursive;
+            font-size: 40px;
+            font-weight: bold;
+            color: black;
+        }
+
+        /* 푸터 */
+        footer{   
+            width: 100%;                      /* 너비 */
+            height:100px;                     /* 높이 */
+            border-top:2px double black;    /* 가로선 */
+        }
+
+        footer > div {
+            text-align:center;
+            font-family:'Times New Roman';
+            font-size: 12px;
+            padding: 15px;
+        }
+
+    </style>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+</head>
+<body>
+<header class="bg-info">
+    <div>NFT 장터</div>
+</header>
+<main>  
+
+    <nav class="navbar navbar-expand-md bg-info" aria-label="">
+        <div class="container my-0">
+            <a class="navbar-brand" href="#">NFT</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#myMenuTop"
+                aria-controls="myMenuTop" aria-expanded="false" aria-label="">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="myMenuTop">
+                <ul class="navbar-nav me-auto mb-0">
+
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="index_mp_0103_listing.html">판매중</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="index_mp_0103_minting.html">민팅</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="index_mp_0103_manage.html">관리</a>
+                    </li>
+
+                </ul>
+            </div>
+
+        </div>
+    </nav>
+
+
+    <!-- 그리드를 만들고 행별로 카드 2~3장씩 넣어 본다. -->
+    <div class="container">
+        <div class="row my-3">
+
+            <!-- 나중에 카드가 동적으로 삽입될 자리 -->
+        
+        </div>  <!-- Row의 끝-->
+    </div>   <!-- End of container. -->
+
+
+</main>
+<footer class="footer" style="margin-top: 30px">
+    <div>
+    못생긴 고릴라 처럼 💙
+    </div>
+</footer>
+
+
+    <!-- 카드 템플레이트 -->      
+    <div id = "cardTemplate" style ="display:none">      <!--일단은 숨겨진 채로 둔다.--> 
+        <div class="col-md-3 col-sm-4 my-3">
+            <div class="card">
+                <img src="" class="card-img-top" alt="..." >
+                <div class="card-body">
+                    <h5 id = "myTitle" class="card-title"><b><span></span></b></h5>
+                    <p id = "myID" class ="card-text"> <b> ID# : </b> <span> </span> </p>
+                    <p id = "myPrice" class ="card-text"> <b> 가격 : </b> <span> </span> ETH</p>
+                    <p id = "myImgURL" class ="card-text" style="display:none;"> </p>          <!-- 숨겨진 정보 -->
+                    <p id = "myDescription" class ="card-text" style="display:none;"> </p>     <!-- 숨겨진 정보 -->
+                    <p id = "myOwnerAddress" class ="card-text" style="display:none;"> </p>    <!-- 숨겨진 정보 -->
+                    
+                    <!-- 모든 버튼은 일단 숨겨진 채로 둔다.--> 
+                    <button id="buttonPurchase" class="m-1 btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModalPurchase" style="display:none;">구매하기</button>
+                    <button id="buttonInfo" class="m-1 btn btn-info" data-bs-toggle="modal" data-bs-target="#myModalInfo" style="display:none;" >세부정보</a>  
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 세부정보 모달창 준비 -->
+    <div class="modal" id="myModalInfo">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">NFT 세부정보</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <img src="" class="img-fluid img-thumbnail" id="img" alt="..." style="width:30%;">
+                </div>
+                <div class="form-group mt-3">
+                    <label for="title">프로젝트 :</label>
+                    <input type="text" class="form-control" id="title" disabled />
+                </div>
+                <div class="form-group mt-3">
+                    <label for="id">ID# :</label>
+                    <input type="text" class="form-control" id="id" disabled />
+                </div>
+                <div class="form-group mt-3">
+                    <label for="priceInfo">가격 :</label>
+                    <input type="text" class="form-control" id="priceInfo" disabled />
+                </div>
+                <div class="form-group mt-3">
+                    <label for="description">설명 :</label>
+                    <input type="text" class="form-control" id="description" disabled/>
+                </div>
+                <div class="form-group mt-3 mb-1">
+                    <label for="ownerAddress">소유자 :</label>
+                    <input type="text" class="form-control" id="ownerAddress" disabled/>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+            </div>
+            </div>
+        </div>
+    </div>  
+
+    <!-- 구매하기 모달창 준비 -->
+    <div class="modal" id="myModalPurchase">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">다음 NFT 구매를 확인해 주세요.</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group mt-3">
+                    <label for="title">프로젝트 :</label>
+                    <input type="text" class="form-control" id="title" disabled />
+                </div>
+                <div class="form-group mt-3">
+                    <label for="id">ID# :</label>
+                    <input type="text" class="form-control" id="id" disabled />
+                </div>
+                <div class="form-group mt-3">
+                    <label for="priceInfo">가격 :</label>
+                    <input type="text" class="form-control" id="priceInfo" disabled />
+                </div>
+                <div class="form-group mt-3">
+                    <label for="description">설명 :</label>
+                    <input type="text" class="form-control" id="description" disabled/>
+                </div>
+                <div class="form-group mt-3 mb-1">
+                    <label for="ownerAddress">소유자 :</label>
+                    <input type="text" class="form-control" id="ownerAddress" disabled/>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" id="confirmPurchase">구매 확인!</button>
+            </div>
+            </div>
+        </div>
+    </div>  
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa" crossorigin="anonymous"></script>
+<!-- jQuery -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<!-- Web3.js -->
+<script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+<!-- <script type="text/javascript" src="./js/web3.min.js" ></script> -->
+<!-- Axios.js -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<!-- Form-Data.js -->
+<script src="https://unpkg.com/browse/form-data@4.0.0/lib/browser.js"></script>
+<!-- JS 코드 -->
+<script src ="./js/myABI.js"></script>
+<script src ="./js/code03_listing.js"></script>
+</body>
+</html>

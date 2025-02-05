@@ -1,0 +1,55 @@
+[
+    {
+        "title":"온순하고 사람 좋아하는 강아지",
+        "id":0,
+        "breed": "진도",
+        "age": 2,
+	"cost": 0.01, 
+        "src": "https://www.japantimes.co.jp/wp-content/uploads/2022/01/np_file_134471.jpeg" 
+        },
+
+    {
+        "title":"활발하고 사람 좋아하는 강아지",
+        "id":1,
+        "breed": "래브라도",
+        "age": 1,
+	"cost": 0.01, 
+        "src": "https://www.nih.gov/sites/default/files/news-events/news-releases/2020/20200709-dog.jpg" 
+        },
+    
+    {
+        "title":"어린이들과 잘 놀아주는 강아지",
+        "id":2,
+        "breed": "믹스",
+        "age": 1,
+	"cost": 0.02, 
+        "src": "https://www.dogsloversblog.com/wp-content/uploads/2021/11/How-Long-Does-It-Take-For-A-Puppy-To-Learn-Its-Name.jpg" 
+        },
+
+    {
+        "title":"먹고 자기 좋아하는 고양이",
+        "id":3,
+        "breed": "믹스",
+        "age": 5,
+	"cost": 0.015, 
+        "src": "https://www.ilyosisa.co.kr/data/photos/20220416/art_16502430231724_6789b2.jpg" 
+        },
+
+    {
+        "title":"활발하고 호기심 많은 고양이",
+        "id":4,
+        "breed": "믹스",
+        "age": 2,
+	"cost": 0.008, 
+        "src": "https://blog.kakaocdn.net/dn/cvkZa0/btrstJEf87s/43boYYB9xSPoi8LfXqKBBK/img.jpg" 
+        },
+
+    {
+        "title":"이런 개냥이 따로 없음~",
+        "id":5,
+        "breed": "믹스",
+        "age": 1,
+	"cost": 0.012, 
+        "src": "https://cdn.fneyefocus.com/news/photo/202012/15259_18481_3443.jpg" 
+        }
+]

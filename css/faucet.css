@@ -1,0 +1,79 @@
+/* CSS */ 
+@import url('https://fonts.googleapis.com/css2?family=Merienda:wght@700&display=swap');
+
+/* 전반적인 스타일링 */
+* {
+    margin:0;            /* 마진 리셋 */
+    padding:0;           /* 패딩 리셋 */
+    font-family:'Times New Roman';
+    font-size: 15px;
+   }
+
+#senderAddr {
+    font-size: 18px;
+    font-family: 'Merienda';
+    text-align: left;
+    color:black;
+    width: 500px;
+    height: 38px;
+    margin: 5px;
+    border: 1px solid steelblue;
+    border-radius: 3px;
+}  
+
+#getButton {
+    padding: 5px;
+    margin: 5px;
+    height: 40px;
+}
+
+#refundButton {
+    padding: 5px;
+    margin: 5px;
+    height: 40px;
+}
+
+#show {
+    margin-top:5;    
+    padding:5;   
+    font-family:'Times New Roman';
+    font-style: italic;
+    font-size: 15px;
+}
+
+/* 헤더 */
+header {
+    width:100%;
+    height: 100px;
+    background-color: greenyellow;
+    margin-bottom:30px;
+}
+
+header > div {
+    text-align:center;
+    padding-top:20px;
+    font-family:'Merienda', cursive;
+    font-size: 40px;
+    font-weight: bold;
+}
+
+/* 개개 행 */
+.row {
+    margin: 5px 10px;
+    display:flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+/* 푸터 */
+footer{   
+    width: 100%;                      /* 너비 */
+    height:100px;                     /* 높이 */
+    border-top:3px double black;    /* 가로선 */
+    margin-top:30px;
+}
+
+footer > div {
+    text-align:center;
+    padding: 15px;
+}

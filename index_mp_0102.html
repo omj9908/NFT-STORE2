@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>애완동물 공개 입양</title>
+    <style>
+        /* 헤더 */
+        header {
+            width:100%;
+            height: 100px;
+            background-color: greenyellow;
+        }
+
+        header > div {
+            text-align:center;
+            padding-top:20px;
+            font-family:'Merienda', cursive;
+            font-size: 40px;
+            font-weight: bold;
+        }
+
+        /* 푸터 */
+        footer{   
+            width: 100%;                      /* 너비 */
+            height:100px;                     /* 높이 */
+            border-top:2px double black;    /* 가로선 */
+        }
+
+        footer > div {
+            text-align:center;
+            font-family:'Times New Roman';
+            font-size: 20px;
+            padding: 15px;
+        }
+
+        /* 이미지 흑백 처리 클래스 */
+        .img_bw {
+            filter: grayscale(100%);
+        }
+    </style>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+</head>
+<body>
+
+    <header>
+        <div>애완동물 입양 서비스</div>
+    </header>
+
+    <main>
+        
+    <!-- 그리드를 만들고 행별로 카드 2~3장씩 넣어 본다. -->
+        <div class="container">
+            <div class="row my-3">
+
+                <!-- 나중에 카드가 동적으로 삽입될 자리 -->
+            
+            </div>  <!-- Row의 끝-->
+        </div>   <!-- End of container. -->
+        
+    </main>
+
+    <footer>
+        <div>
+        못생긴 고릴라 처럼 💙
+        </div>
+    </footer>
+
+    <!-- 카드 템플레이트 -->      
+    <div id = "cardTemplate" style ="display:none">      <!--일단은 숨겨진 채로 둔다.--> 
+    <div class="col-md-4 col-sm-6 my-3">
+        <div class="card" style="width: 100%">
+            <img src="" class="card-img-top" alt="...">
+            <div class="card-body">
+                <h5 id = "myTitle" class="card-title">제목</h5>
+                <p id = 'myID' class="card-text"> <b> ID : </b> <span> </span></p>
+                <p id = 'myBreed' class="card-text"> <b> 품종 : </b> <span> </span></p>
+                <p id = "myAge" class ="card-text"> <b> 나이 : </b> <span> </span></p>
+                <p id = "myCost" class ="card-text"> <b> 비용 : </b> <span> </span> ETH</p>
+                <button type="button" class="m-4 btn btn-primary adopt" data-bs-toggle="modal" data-bs-target="#myModalAdopt" style="display:inline">입양하기</button>
+                <button type="button" class="m-4 btn btn-info info" data-bs-toggle="modal" data-bs-target="#myModalInfo" style="display:none" >입양자 정보</a>   <!--일단은 숨겨진 채로 둔다.--> 
+            </div>
+            </div>
+    </div>
+    </div>
+
+    <!-- 모달창 준비 1 -->
+    <div class="modal" tabindex="-1" id="myModalAdopt">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">다음 정보를 입력해 주세요.</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <input type="hidden" id="myIDAdoptee" />                   <!-- 카드에서 가져온 ID 정보를 저장해 두는 곳. -->
+              <input type="hidden" id="myCostAdoptee" />                 <!-- 카드에서 가져온 Cost 정보를 저장해 두는 곳. -->
+              <input type="text" class="form-control mb-1" id="nameAdopter" placeholder="입양자 이름" />
+              <input type="text" class="form-control" id="contactAdopter" placeholder="전화 번호 또는 이메일" />
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+              <button type="button" class="btn btn-primary" id="confirmAdopt">입양 확인!</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+        <!-- 모달창 준비 2 -->
+        <div class="modal" tabindex="-1" id="myModalInfo">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">입양자 정보는 다음과 같습니다.</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group mb-1">
+                        <label for="addrAdopterInfo">계정 :</label>
+                        <input type="text" class="form-control" id="addrAdopterInfo" disabled/>
+                    </div>
+                    <div class="form-group mb-1">
+                        <label for="nameAdopterInfo">이름 :</label>
+                        <input type="text" class="form-control" id="nameAdopterInfo" disabled/>
+                    </div>
+                    <div class="form-group">
+                        <label for="contactAdopterInfo">연락처 :</label>
+                        <input type="text" class="form-control" id="contactAdopterInfo" disabled />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+              </div>
+            </div>
+          </div>  
+
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa" crossorigin="anonymous"></script>
+    <!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- Web3.js -->
+    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+    <!-- <script type="text/javascript" src="./js/web3.min.js" ></script> -->
+    <!-- JS 코드 -->
+    <script src ="./js/code02.js"></script>
+    
+</body>
+</html>

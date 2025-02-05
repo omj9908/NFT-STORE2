@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head> 
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFT 관리</title>
+
+    <style>
+        /* 헤더 스타일 */
+        header {
+            width: 100%;
+            height: 80px;
+        }
+
+        header > div {
+            text-align: center;
+            padding-top: 20px;
+            font-family: 'Merienda', cursive;
+            font-size: 40px;
+            font-weight: bold;
+            color: black;
+        }
+
+        /* 푸터 스타일 */
+        footer {   
+            width: 100%;
+            height: 100px;
+            border-top: 2px double black;
+        }
+
+        footer > div {
+            text-align: center;
+            font-family: 'Times New Roman';
+            font-size: 12px;
+            padding: 15px;
+        }
+    </style>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Web3.js -->
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+</head>
+<body>
+
+<header class="bg-info">
+    <div>NFT 관리</div>
+</header>
+
+<!-- 네비게이션 바 추가 -->
+<nav class="navbar navbar-expand-md bg-info">
+    <div class="container my-0">
+        <a class="navbar-brand" href="#">NFT</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#myMenuTop">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="myMenuTop">
+            <ul class="navbar-nav me-auto mb-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="index_mp_0103_listing.html">판매중</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="index_mp_0103_minting.html">민팅</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="index_mp_0103_manage.html">관리</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<main class="container my-5">
+    <h2 class="mt-4">내 NFT 목록</h2>
+    <button class="btn btn-success mb-3" onclick="loadMyNFTs()">내 NFT 불러오기</button>
+    <p id="status"></p>
+
+    <!-- NFT 목록이 표시될 컨테이너 -->
+    <div class="row" id="nftContainer"></div>
+</main>
+
+<footer class="footer" style="margin-top: 30px">
+    <div>못생긴 고릴라 처럼 💙</div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- jQuery -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<!-- Web3.js -->
+<script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+<!-- JS 코드 -->
+<script src="./js/code03_manage.js"></script>
+</body>
+</html>
