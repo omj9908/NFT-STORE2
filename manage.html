@@ -58,13 +58,13 @@
         <div class="collapse navbar-collapse" id="myMenuTop">
             <ul class="navbar-nav me-auto mb-0">
                 <li class="nav-item">
-                    <a class="nav-link" href="index_mp_0103_listing.html">판매중</a>
+                    <a class="nav-link" href="listing.html">판매중</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="index_mp_0103_minting.html">민팅</a>
+                    <a class="nav-link" href="minting.html">민팅</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active" href="index_mp_0103_manage.html">관리</a>
+                    <a class="nav-link active" href="manage.html">관리</a>
                 </li>
             </ul>
         </div>
@@ -80,6 +80,27 @@
     <div class="row" id="nftContainer"></div>
 </main>
 
+<!-- ✅ NFT 이름 변경 모달 추가 -->
+<div class="modal fade" id="nameChangeModal" tabindex="-1" aria-labelledby="nameChangeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="nameChangeModalLabel">NFT 이름 변경</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="modalTokenId">
+                <label for="newNFTName">새로운 NFT 이름:</label>
+                <input type="text" id="newNFTName" class="form-control" placeholder="새 NFT 이름 입력">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                <button type="button" class="btn btn-primary" onclick="confirmNameChange()">변경</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <footer class="footer" style="margin-top: 30px">
     <div>못생긴 고릴라 처럼 💙</div>
 </footer>
@@ -91,6 +112,37 @@
 <!-- Web3.js -->
 <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
 <!-- JS 코드 -->
-<script src="./js/code03_manage.js"></script>
+<script src="./js/manage.js"></script>
+
+<script>
+    // ✅ NFT 이름 변경 모달 열기
+    function openNameChangeModal(tokenId) {
+        document.getElementById("modalTokenId").value = tokenId;
+        document.getElementById("newNFTName").value = "";
+        const nameChangeModal = new bootstrap.Modal(document.getElementById("nameChangeModal"));
+        nameChangeModal.show();
+    }
+
+    // ✅ NFT 이름 변경 실행
+    async function confirmNameChange() {
+        const tokenId = document.getElementById("modalTokenId").value;
+        const newName = document.getElementById("newNFTName").value;
+
+        if (!newName) {
+            alert("NFT 이름을 입력하세요!");
+            return;
+        }
+
+        try {
+            await changeNFTName(tokenId, newName);
+            alert(`NFT #${tokenId}의 이름이 "${newName}"으로 변경되었습니다.`);
+            loadMyNFTs(); // 새로고침
+        } catch (error) {
+            console.error("❌ NFT 이름 변경 오류:", error);
+            alert("NFT 이름 변경에 실패했습니다.");
+        }
+    }
+</script>
+
 </body>
 </html>

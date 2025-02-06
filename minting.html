@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head> 
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -57,13 +57,13 @@
             <div class="collapse navbar-collapse" id="myMenuTop">
                 <ul class="navbar-nav me-auto mb-0">
                     <li class="nav-item">
-                        <a class="nav-link" href="index_mp_0103_listing.html">판매중</a>
+                        <a class="nav-link" href="listing.html">판매중</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="index_mp_0103_minting.html">민팅</a>
+                        <a class="nav-link active" href="minting.html">민팅</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="index_mp_0103_manage.html">관리</a>
+                        <a class="nav-link" href="manage.html">관리</a>
                     </li>
                 </ul>
             </div>
@@ -78,7 +78,11 @@
             </div>
 
             <div class="col-12 py-3 my-3">
-                <input type="text" class="form-control" id="description" placeholder="이미지의 설명 입력">
+                <input type="text" class="form-control" id="nftName" placeholder="NFT 이름 입력">
+            </div>
+
+            <div class="col-12 py-3 my-3">
+                <input type="text" class="form-control" id="description" placeholder="NFT 설명 입력">
             </div>
 
             <!-- 이미지 업로드 -->
@@ -98,7 +102,7 @@
 
             <!-- NFT 민팅 버튼 -->
             <div>
-                <button class="btn btn-danger" id="mintButton" onclick="mintNFT()">토큰 민팅</button>
+                <button class="btn btn-danger" id="mintButton">토큰 민팅</button>
             </div>
 
             <!-- 상태 메시지 -->
@@ -111,19 +115,16 @@
     <div>못생긴 고릴라 처럼 💙</div>
 </footer>
 
-
 <!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
 <!-- jQuery -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <!-- Web3.js -->
 <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
-<!-- <script type="text/javascript" src="./js/web3.min.js" ></script> -->
 <!-- Axios.js -->
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<!-- Form-Data.js -->
-<script src="https://unpkg.com/browse/form-data@4.0.0/lib/browser.js"></script>
 <!-- JS 코드 -->
-<script src ="./js/code03_minting.js"></script>
+<script src="./js/minting.js"></script>
+
 </body>
 </html>

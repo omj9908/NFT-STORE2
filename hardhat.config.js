@@ -1,12 +1,16 @@
 require("@nomicfoundation/hardhat-toolbox");
-require("dotenv").config(); // ✅ 환경 변수 불러오기
+require("dotenv").config(); // ✅ 환경 변수 로드
+
+console.log("📌 [Debug] GANACHE_PRIVATE_KEY:", process.env.GANACHE_PRIVATE_KEY);
+console.log("📌 [Debug] GANACHE_RPC_URL:", process.env.GANACHE_RPC_URL);
+console.log("📌 [Debug] GANACHE_CHAIN_ID:", process.env.GANACHE_CHAIN_ID);
 
 module.exports = {
   solidity: {
     compilers: [
-      { version: "0.8.18" }, // ✅ Solidity 0.8.18 지원
-      { version: "0.8.20" }, // ✅ Solidity 0.8.20 지원
-      { version: "0.8.28" }  // ✅ Solidity 0.8.28 지원
+      { version: "0.8.18" },
+      { version: "0.8.20" },
+      { version: "0.8.28" }
     ]
   },
   networks: {
@@ -14,9 +18,9 @@ module.exports = {
       chainId: 31337,
     },
     ganache: {
-      url: "http://127.0.0.1:7545",
-      chainId: 1337,
-      accounts: [process.env.GANACHE_PRIVATE_KEY]
+      url: process.env.GANACHE_RPC_URL, // ✅ 환경 변수에서 Ganache URL 불러오기
+      chainId: parseInt(process.env.GANACHE_CHAIN_ID), // ✅ 환경 변수에서 Chain ID 불러오기
+      accounts: process.env.GANACHE_PRIVATE_KEY ? [`0x${process.env.GANACHE_PRIVATE_KEY}`] : [] // ✅ Ganache Private Key 불러오기
     },
   },
 };
