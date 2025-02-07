@@ -11,9 +11,14 @@ contract MyNFT is ERC721URIStorage, ERC721Enumerable {
 
     mapping(uint256 => string) private _tokenNames;
     mapping(uint256 => bool) private _burnedTokens;
+    mapping(uint256 => uint256) public nftPrices; // NFT 판매 가격 저장
 
     event NFTMinted(address indexed owner, uint256 tokenId, string nftTokenURI);
     event NFTBurned(address indexed owner, uint256 tokenId);
+    event NFTListedForSale(uint256 tokenId, uint256 price);
+    event NFTPurchased(uint256 tokenId, address buyer);
+    event NFTPriceUpdated(uint256 tokenId, uint256 newPrice);
+    event NFTNameUpdated(uint256 tokenId, string newName);
 
     constructor() ERC721("MyNFT", "MNFT") {}
 
@@ -41,11 +46,29 @@ contract MyNFT is ERC721URIStorage, ERC721Enumerable {
     // ✅ **NFT 정보 조회 함수**
     function getNFTInfo(
         uint256 tokenId
-    ) public view returns (string memory, string memory, address) {
+    ) public view returns (string memory, string memory, address, uint256) {
         require(_exists(tokenId), "NFT does not exist");
         require(!_burnedTokens[tokenId], "NFT is burned");
 
-        return (tokenURI(tokenId), _tokenNames[tokenId], ownerOf(tokenId));
+        return (
+            tokenURI(tokenId),
+            _tokenNames[tokenId],
+            ownerOf(tokenId),
+            nftPrices[tokenId]
+        );
+    }
+
+    // ✅ **NFT 이름 변경 기능 (소유권 검증 개선)**
+    function setNFTName(uint256 tokenId, string memory newName) public {
+        require(_exists(tokenId), "NFT does not exist");
+        require(
+            ownerOf(tokenId) == msg.sender,
+            "Only owner can change NFT name"
+        );
+        require(!_burnedTokens[tokenId], "NFT is burned");
+
+        _tokenNames[tokenId] = newName;
+        emit NFTNameUpdated(tokenId, newName);
     }
 
     // ✅ **NFT 소각 기능**
@@ -55,6 +78,7 @@ contract MyNFT is ERC721URIStorage, ERC721Enumerable {
         _burn(tokenId);
         _burnedTokens[tokenId] = true;
         delete _tokenNames[tokenId];
+        delete nftPrices[tokenId]; // 판매 목록에서 삭제
 
         emit NFTBurned(msg.sender, tokenId);
     }
@@ -70,6 +94,47 @@ contract MyNFT is ERC721URIStorage, ERC721Enumerable {
             ownedNFTs[i] = tokenOfOwnerByIndex(owner, i);
         }
         return ownedNFTs;
+    }
+
+    // ✅ **NFT 판매 등록 기능**
+    function listNFTForSale(uint256 tokenId, uint256 price) public {
+        require(
+            ownerOf(tokenId) == msg.sender,
+            "Only owner can list NFT for sale"
+        );
+        require(!_burnedTokens[tokenId], "NFT is burned");
+        require(price > 0, "Price must be greater than 0");
+
+        nftPrices[tokenId] = price;
+        emit NFTListedForSale(tokenId, price);
+    }
+
+    // ✅ **NFT 가격 변경 기능 추가**
+    function updateNFTPrice(uint256 tokenId, uint256 newPrice) public {
+        require(
+            ownerOf(tokenId) == msg.sender,
+            "Only owner can change the price"
+        );
+        require(!_burnedTokens[tokenId], "NFT is burned");
+        require(newPrice > 0, "Price must be greater than 0");
+
+        nftPrices[tokenId] = newPrice;
+        emit NFTPriceUpdated(tokenId, newPrice);
+    }
+
+    // ✅ **NFT 구매 기능**
+    function buyNFT(uint256 tokenId) public payable {
+        require(nftPrices[tokenId] > 0, "NFT is not for sale");
+        require(msg.value >= nftPrices[tokenId], "Insufficient payment");
+
+        address seller = ownerOf(tokenId);
+        _transfer(seller, msg.sender, tokenId);
+
+        // 판매 대금 전송
+        payable(seller).transfer(msg.value);
+        nftPrices[tokenId] = 0; // 판매 완료 후 가격 삭제
+
+        emit NFTPurchased(tokenId, msg.sender);
     }
 
     // ✅ **오버라이딩 충돌 해결**
