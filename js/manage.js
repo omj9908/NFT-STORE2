@@ -1,5 +1,12 @@
-const contractAddress = "0xA2A5d9D4691B6F11C5C5C4273440bBDd4B7080A1"; // ✅ 최신 컨트랙트 주소
+const contractAddress = "0xe3915F828712F04E4de1ffBF35f47b2517B2F5A4"; // ✅ 최신 컨트랙트 주소
 const contractABI = [
+  {
+    "inputs": [],
+    "name": "owner",  // ✅ 컨트랙트 소유자 조회 함수 추가!
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
   {
     "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }],
     "name": "getOwnedNFTs",
@@ -20,10 +27,13 @@ const contractABI = [
     "type": "function"
   },
   {
-    "inputs": [{ "internalType": "uint256", "name": "tokenId", "type": "uint256" }],
+    "inputs": [
+      { "internalType": "uint256", "name": "tokenId", "type": "uint256" },
+      { "internalType": "string", "name": "newName", "type": "string" }
+    ],
     "name": "setNFTName",
     "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "payable",
     "type": "function"
   },
   {
@@ -51,12 +61,18 @@ const contractABI = [
     "type": "function"
   },
   {
-    // ✅ **NFT 가격 변경 함수 추가**
     "inputs": [
       { "internalType": "uint256", "name": "tokenId", "type": "uint256" },
       { "internalType": "uint256", "name": "newPrice", "type": "uint256" }
     ],
     "name": "updateNFTPrice",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "amount", "type": "uint256" }],
+    "name": "withdrawFunds",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -118,12 +134,11 @@ async function fetchImageFromMetadata(tokenURI) {
   }
 }
 
-
 async function loadMyNFTs() {
   await connectWallet();
   const accounts = await web3.eth.getAccounts();
   const nftContainer = document.getElementById("nftContainer");
-  nftContainer.innerHTML = "";
+  nftContainer.innerHTML = ""; // 기존 목록 초기화
   document.getElementById("status").innerText = "NFT 불러오는 중...";
 
   try {
@@ -140,7 +155,10 @@ async function loadMyNFTs() {
         const nft = await contract.methods.getNFTInfo(tokenId).call();
         console.log(`📌 NFT ${tokenId} 정보:`, nft);
 
-        let metadata = { imageUrl: "https://dummyimage.com/250x250/cccccc/000000.png&text=No+Image", description: "설명이 없습니다." };
+        let metadata = { 
+          imageUrl: "https://dummyimage.com/250x250/cccccc/000000.png&text=No+Image", 
+          description: "설명이 없습니다." 
+        };
 
         if (nft.tokenURI) {
           console.log(`🌍 Original tokenURI: ${nft.tokenURI}`);
@@ -152,32 +170,33 @@ async function loadMyNFTs() {
           }
         }
 
-        console.log(`✅ 최종 NFT 이미지 URL: ${metadata.imageUrl}`);
+        // ✅ NFT 가격이 `undefined`일 경우 기본값 설정
+        const priceInEther = nft.price ? web3.utils.fromWei(nft.price, "ether") : "판매되지 않음";
 
         // ✅ NFT 카드 UI 생성
         const nftElement = document.createElement("div");
         nftElement.classList.add("col-md-4", "mb-4");
 
         nftElement.innerHTML = `
-          <div class="card shadow-sm">
-            <img src="${metadata.imageUrl}" class="card-img-top" 
-              onerror="this.onerror=null;this.src='https://dummyimage.com/250x250/cccccc/000000.png&text=No+Image'">
-            <div class="card-body text-center">
-              <h5 class="card-title">NFT #${tokenId} - ${nft.tokenName || "이름 없음"}</h5>
-              <p><b>판매 가격:</b> ${nft.price > 0 ? `${web3.utils.fromWei(nft.price, "ether")} ETH` : "판매되지 않음"}</p>
-              <p><b>설명:</b> ${metadata.description}</p> <!-- ✅ 설명 추가 -->
-              <div class="d-grid gap-2">
-                <button class="btn btn-info" onclick="viewNFTDetails(${tokenId})">세부정보</button>
-                <button class="btn btn-primary" onclick="changeNFTName(${tokenId})">이름 변경</button>
-                <button class="btn btn-warning" onclick="openPriceChangeModal(${tokenId}, ${nft.price})">가격 변경</button>
-                <button class="btn btn-danger" onclick="burnNFT(${tokenId})">폐기</button>
-                ${nft.price == 0 
+            <div class="card shadow-sm">
+                <img src="${metadata.imageUrl}" class="card-img-top" 
+                    onerror="this.onerror=null;this.src='https://dummyimage.com/250x250/cccccc/000000.png&text=No+Image'">
+                <div class="card-body text-center">
+                    <h5 class="card-title">NFT #${tokenId} - ${nft.tokenName || "이름 없음"}</h5>
+                    <p><b>판매 가격:</b> ${priceInEther} ETH</p>
+                    <p><b>설명:</b> ${metadata.description}</p>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-info" onclick="viewNFTDetails(${tokenId})">세부정보</button>
+                        <button class="btn btn-primary" onclick="openNameChangeModal(${tokenId})">이름 변경</button>
+                        <button class="btn btn-warning" onclick="openPriceChangeModal(${tokenId}, ${nft.price || 0})">가격 변경</button>
+                        <button class="btn btn-danger" onclick="burnNFT(${tokenId})">폐기</button>
+                        ${nft.price == 0 
           ? `<button class="btn btn-success" onclick="listNFTForSale(${tokenId})">판매 등록</button>` 
           : ""
         }
-              </div>
+                    </div>
+                </div>
             </div>
-          </div>
         `;
 
         // ✅ NFT 목록에 추가
@@ -191,6 +210,45 @@ async function loadMyNFTs() {
     document.getElementById("status").innerText = "NFT 조회 오류 발생!";
   }
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+  const withdrawButton = document.getElementById("withdrawButton");
+
+  if (withdrawButton) {
+      withdrawButton.addEventListener("click", async function () {
+          await connectWallet();
+          const accounts = await web3.eth.getAccounts();
+
+          try {
+              const owner = await contract.methods.owner().call();
+              if (accounts[0].toLowerCase() !== owner.toLowerCase()) {
+                  alert("출금 실패! 컨트랙트 소유자만 가능합니다.");
+                  return;
+              }
+
+              let amountToWithdraw = prompt("출금할 금액을 ETH 단위로 입력하세요:", "1");
+              if (!amountToWithdraw || isNaN(amountToWithdraw) || parseFloat(amountToWithdraw) <= 0) {
+                  alert("올바른 출금 금액을 입력하세요!");
+                  return;
+              }
+
+              const withdrawAmount = web3.utils.toWei(amountToWithdraw, "ether");
+
+              // ✅ 중요: `withdrawFunds` 호출 시 `amount` 전달해야 함!
+              await contract.methods.withdrawFunds(withdrawAmount).send({
+                  from: accounts[0],
+                  gas: 300000,
+                  gasPrice: await web3.eth.getGasPrice()
+              });
+
+              alert(`✅ ${amountToWithdraw} ETH가 컨트랙트에서 출금되었습니다.`);
+          } catch (error) {
+              console.error("❌ 출금 오류:", error);
+              alert("출금 실패! 컨트랙트에 잔액이 있는지 확인하세요.");
+          }
+      });
+  }
+});
 
 
 async function viewNFTDetails(tokenId) {
@@ -254,64 +312,90 @@ function openNameChangeModal(tokenId) {
   const newNameField = document.getElementById("newNFTName");
 
   if (!modalElement || !tokenIdField || !newNameField) {
-    console.error("❌ 오류: 이름 변경 모달 요소를 찾을 수 없습니다!");
+    console.error("❌ 오류: 모달 요소를 찾을 수 없습니다!");
     alert("오류 발생! 페이지를 새로고침한 후 다시 시도하세요.");
     return;
   }
 
+  // ✅ Bootstrap 모달 강제 실행
+  let modalInstance = bootstrap.Modal.getInstance(modalElement);
+  if (!modalInstance) {
+    modalInstance = new bootstrap.Modal(modalElement);
+  }
+
+  // ✅ 입력 필드 초기화 및 강제 표시
+  newNameField.value = ""; 
+  newNameField.style.display = "block";
+  newNameField.style.visibility = "visible";
+  newNameField.style.opacity = "1";
+
   // ✅ 토큰 ID 설정
   tokenIdField.value = tokenId;
-  newNameField.value = ""; // 기존 입력값 초기화
 
-  // ✅ 모달 열기
-  const modalInstance = new bootstrap.Modal(modalElement);
+  // ✅ Bootstrap 모달 강제 표시
   modalInstance.show();
+
+  console.log("✅ 모달이 정상적으로 열렸습니다.");
 }
 
-
-
-// ✅ **NFT 이름 변경 실행**
 async function changeNFTName() {
   console.log("📌 NFT 이름 변경 실행");
 
-  // ✅ 요소 가져오기
   const tokenIdField = document.getElementById("modalTokenId");
   const newNameField = document.getElementById("newNFTName");
 
-  // ✅ 요소 존재 여부 확인
   if (!tokenIdField || !newNameField) {
-    console.error("❌ NFT 이름 변경 오류: `modalTokenId` 또는 `newNFTName` 요소가 없습니다.");
-    alert("오류 발생! 페이지를 새로고침한 후 다시 시도하세요.");
-    return;
+      console.error("❌ NFT 이름 변경 오류: `modalTokenId` 또는 `newNFTName` 요소가 없습니다.");
+      alert("오류 발생! 페이지를 새로고침한 후 다시 시도하세요.");
+      return;
   }
 
   const tokenId = tokenIdField.value;
   const newName = newNameField.value.trim();
 
   if (!newName) {
-    alert("NFT 이름을 입력하세요!");
-    return;
+      alert("NFT 이름을 입력하세요!");
+      newNameField.focus();
+      newNameField.style.border = "2px solid red";
+      return;
   }
 
   await connectWallet();
   const accounts = await web3.eth.getAccounts();
 
   try {
-    await contract.methods.setNFTName(tokenId, newName).send({
-      from: accounts[0],
-      gasPrice: await web3.eth.getGasPrice()
-    });
+      // ✅ 현재 네트워크에서 사용 가능한 가스 가격 자동 조회
+      const gasPrice = await web3.eth.getGasPrice();
 
-    alert(`✅ NFT #${tokenId}의 이름이 "${newName}"으로 변경되었습니다.`);
+      await contract.methods.setNFTName(tokenId, newName).send({
+          from: accounts[0],
+          value: web3.utils.toWei("0.01", "ether"), // ✅ 0.01 ETH 전송
+          gas: 300000, // ✅ 충분한 가스 설정
+          gasPrice: gasPrice // ✅ `gasPrice`를 수동으로 설정하여 EIP-1559 오류 해결
+      });
 
-    // ✅ 모달 닫기
-    const nameChangeModal = bootstrap.Modal.getInstance(document.getElementById("nameChangeModal"));
-    if (nameChangeModal) nameChangeModal.hide();
+      alert(`✅ NFT #${tokenId}의 이름이 "${newName}"으로 변경되었습니다.`);
 
-    loadMyNFTs(); // ✅ 변경된 이름을 반영하기 위해 목록 새로고침
+      // ✅ 모달 닫기
+      const modalElement = document.getElementById("nameChangeModal");
+      const modalInstance = bootstrap.Modal.getInstance(modalElement);
+      if (modalInstance) modalInstance.hide(); // ✅ Bootstrap 모달 닫기
+
+      // ✅ `modal-backdrop` 제거 (화면 회색 배경 해결)
+      document.querySelectorAll(".modal-backdrop").forEach(el => el.remove());
+
+      // ✅ 웹사이트 화면 다시 활성화
+      document.body.classList.remove("modal-open");
+      document.body.style.removeProperty("overflow");
+
+      // ✅ NFT 목록 새로고침을 약간 지연 (애니메이션 자연스럽게 처리)
+      setTimeout(() => {
+          loadMyNFTs();
+      }, 500);
+
   } catch (error) {
-    console.error("❌ NFT 이름 변경 오류:", error);
-    alert("NFT 이름 변경 실패! 본인 소유인지 확인하세요.");
+      console.error("❌ NFT 이름 변경 오류:", error);
+      alert("NFT 이름 변경 실패! 가스를 확인하세요.");
   }
 }
 
@@ -356,46 +440,51 @@ async function burnNFT(tokenId) {
     alert("NFT 삭제 실패! 소유자만 삭제할 수 있습니다.");
   }
 }
-
-// ✅ **NFT 가격 변경 모달 열기**
 function openPriceChangeModal(tokenId, currentPrice) {
   console.log("📌 가격 변경 모달 실행:", tokenId, currentPrice);
 
-  // ✅ 가격 변경 모달 요소가 존재하는지 확인
+  // ✅ 가격 변경 모달 요소 찾기
   const modalElement = document.getElementById("myModalChangePrice");
   const tokenIdField = document.getElementById("myID");
   const oldPriceField = document.getElementById("oldPrice");
+  const newPriceField = document.getElementById("newPrice");
 
-  if (!modalElement || !tokenIdField || !oldPriceField) {
+  if (!modalElement || !tokenIdField || !oldPriceField || !newPriceField) {
     console.error("❌ 오류: 가격 변경 모달 요소를 찾을 수 없습니다!");
     alert("오류 발생! 페이지를 새로고침한 후 다시 시도하세요.");
     return;
   }
 
-  // ✅ 가격 변경 모달 필드 값 설정
+  // ✅ 토큰 ID 설정
   tokenIdField.value = tokenId;
-  oldPriceField.value = web3.utils.fromWei(currentPrice.toString(), "ether") + " ETH";
 
-  // ✅ Bootstrap 모달 열기
-  const priceChangeModal = new bootstrap.Modal(modalElement);
-  priceChangeModal.show();
+  try {
+    // ✅ `currentPrice`를 안전하게 변환
+    const priceInEther = web3.utils.fromWei(BigInt(currentPrice).toString(), "ether");
+    oldPriceField.value = `${priceInEther} ETH`;
+  } catch (error) {
+    console.error("❌ 가격 변환 오류:", error);
+    oldPriceField.value = "변환 오류";
+  }
+
+  // ✅ 새로운 가격 입력 필드 초기화
+  newPriceField.value = "";
+
+  // ✅ Bootstrap 모달 강제 표시
+  let modalInstance = bootstrap.Modal.getInstance(modalElement);
+  if (!modalInstance) {
+    modalInstance = new bootstrap.Modal(modalElement);
+  }
+  modalInstance.show();
 }
+
 
 async function confirmPriceChange() {
   const tokenId = document.getElementById("myID").value;
-  const newPrice = document.getElementById("newPrice").value;
-  const oldPriceText = document.getElementById("oldPrice").value;
+  const newPrice = document.getElementById("newPrice").value.trim();
 
   if (!newPrice || isNaN(newPrice) || newPrice <= 0) {
     alert("유효한 가격을 입력하세요!");
-    return;
-  }
-
-  const oldPrice = parseFloat(oldPriceText.replace(" ETH", "").trim());
-  const newPriceFloat = parseFloat(newPrice);
-
-  if (oldPrice === newPriceFloat) {
-    alert("❌ 기존 가격과 동일한 가격입니다! 다른 가격을 입력하세요.");
     return;
   }
 
@@ -403,28 +492,30 @@ async function confirmPriceChange() {
   const accounts = await web3.eth.getAccounts();
 
   try {
-    // ✅ `updateNFTPrice` 함수가 존재하는지 확인 후 실행
-    if (!contract.methods.updateNFTPrice) {
-      console.error("❌ 오류: 컨트랙트에 updateNFTPrice 함수가 없습니다!");
-      alert("스마트 컨트랙트에 가격 변경 함수가 없습니다.");
-      return;
-    }
+    console.log(`🔹 가격 변경 실행: NFT #${tokenId}, 새로운 가격: ${newPrice} ETH`);
 
-    await contract.methods.updateNFTPrice(tokenId, web3.utils.toWei(newPrice, "ether")).send({
+    // ✅ `newPrice`를 `wei` 단위로 변환하여 전달
+    const newPriceInWei = web3.utils.toWei(newPrice, "ether");
+
+    // ✅ 컨트랙트 호출 실행
+    await contract.methods.updateNFTPrice(tokenId, newPriceInWei).send({
       from: accounts[0],
+      gas: 300000,
       gasPrice: await web3.eth.getGasPrice()
     });
 
     alert(`✅ NFT #${tokenId} 가격이 ${newPrice} ETH로 변경되었습니다.`);
 
-    // ✅ 변경 완료 후 모달 닫기
+    // ✅ 모달 닫기
     const priceChangeModal = bootstrap.Modal.getInstance(document.getElementById("myModalChangePrice"));
     if (priceChangeModal) priceChangeModal.hide();
 
-    loadMyNFTs(); // ✅ 변경된 가격 반영
+    // ✅ NFT 목록 새로고침
+    loadMyNFTs();
   } catch (error) {
     console.error("❌ NFT 가격 변경 오류:", error);
-    alert("NFT 가격 변경 실패!");
+    alert("NFT 가격 변경 실패! 본인 소유인지 확인하세요.");
   }
 }
+
 

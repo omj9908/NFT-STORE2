@@ -89,7 +89,29 @@
     <div class="row" id="nftContainer"></div>
 </main>
 
-<!-- ✅ NFT 세부정보 모달 -->
+<!-- ✅ 관리자용 출금 기능 -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const withdrawButton = document.getElementById("withdrawButton");
+
+    if (withdrawButton) {
+        withdrawButton.addEventListener("click", async function () {
+            await connectWallet();
+            const accounts = await web3.eth.getAccounts();
+            
+            try {
+                await contract.methods.withdrawFunds().send({ from: accounts[0] });
+
+                alert("✅ 컨트랙트 내 수익이 출금되었습니다.");
+            } catch (error) {
+                console.error("❌ 출금 오류:", error);
+                alert("출금 실패! 컨트랙트 소유자만 가능합니다.");
+            }
+        });
+    }
+});
+</script>
+
 <div class="modal fade" id="nftInfoModal" tabindex="-1" aria-labelledby="nftInfoModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -135,6 +157,7 @@
     </div>
 </div>
 
+<!-- NFT 이름 변경 모달 -->
 <div class="modal fade" id="nameChangeModal" tabindex="-1" aria-labelledby="nameChangeModalLabel">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -145,7 +168,8 @@
             <div class="modal-body">
                 <input type="hidden" id="modalTokenId"> <!-- ✅ 숨겨진 필드 (NFT ID 저장) -->
                 <p><b>새로운 NFT 이름:</b></p>
-                <input type="text" id="newNFTName" class="form-control" placeholder="새 이름 입력">
+                <input type="text" id="newNFTName" class="form-control" placeholder="새 이름 입력" 
+                    style="display: block; visibility: visible;">
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
@@ -155,7 +179,40 @@
     </div>
 </div>
 
+<!-- ✅ 관리자용 출금 버튼 추가 -->
+<div class="container text-center my-4">
+    <button id="withdrawButton" class="btn btn-danger">컨트랙트 수익 출금</button>
+</div>
 
+<!-- ✅ 관리자용 출금 기능 -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const withdrawButton = document.getElementById("withdrawButton");
+
+    if (withdrawButton) {
+        withdrawButton.addEventListener("click", async function () {
+            await connectWallet();
+            const accounts = await web3.eth.getAccounts();
+            
+            try {
+                // ✅ 컨트랙트에서 ETH 출금 (모든 사용자가 가능)
+                await contract.methods.withdrawFunds().send({ 
+                    from: accounts[0], 
+                    gasLimit: 200000 
+                });
+
+                alert("✅ 컨트랙트 내 수익이 출금되었습니다.");
+            } catch (error) {
+                console.error("❌ 출금 오류:", error);
+                alert("출금 실패! 컨트랙트에 잔액이 있는지 확인하세요.");
+            }
+        });
+    }
+});
+</script>
+
+</body>
+</html>
 
 <footer class="footer" style="margin-top: 30px">
     <div>못생긴 고릴라 처럼 💙</div>
@@ -165,6 +222,8 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
 <!-- Web3.js -->
 <script src="./js/manage.js"></script>
+
+
 
 </body>
 </html>
