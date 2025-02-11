@@ -4,13 +4,9 @@ pragma solidity ^0.8.18;
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/access/Ownable.sol"; // ✅ 추가된 부분 (소유자 기능 추가)
+import "@openzeppelin/contracts/access/Ownable.sol"; // ✅ 소유자 기능 추가
 
-contract MyNFT is
-    ERC721URIStorage,
-    ERC721Enumerable,
-    Ownable // ✅ Ownable 상속 추가
-{
+contract MyNFT is ERC721URIStorage, ERC721Enumerable, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
@@ -27,7 +23,7 @@ contract MyNFT is
     event NFTPriceUpdated(uint256 tokenId, uint256 newPrice);
     event NFTNameUpdated(uint256 tokenId, string newName);
 
-    constructor() ERC721("MyNFT", "MNFT") Ownable() {} // ✅ Ownable 초기화 추가
+    constructor() ERC721("MyNFT", "MNFT") Ownable() {}
 
     // ✅ **NFT 민팅 함수**
     function mintNFT(
@@ -65,12 +61,12 @@ contract MyNFT is
         );
     }
 
+    // ✅ **NFT 이름 변경**
     function setNFTName(uint256 tokenId, string memory newName) public payable {
-        // ✅ 반드시 `payable`이어야 함!
         require(_exists(tokenId), "NFT does not exist");
         require(!_burnedTokens[tokenId], "NFT is burned");
         require(bytes(newName).length > 0, "NFT name cannot be empty");
-        require(msg.value >= nameChangeFee, "Not enough ETH sent"); // ✅ 변경 비용 지불 확인
+        require(msg.value >= nameChangeFee, "Not enough ETH sent");
 
         // ✅ 초과 금액 반환
         if (msg.value > nameChangeFee) {
@@ -81,20 +77,20 @@ contract MyNFT is
         emit NFTNameUpdated(tokenId, newName);
     }
 
-    // ✅ **이름 변경 비용 설정 기능 (컨트랙트 소유자만 변경 가능)**
+    // ✅ **이름 변경 비용 설정**
     function setNameChangeFee(uint256 newFee) public onlyOwner {
         nameChangeFee = newFee;
     }
 
+    // ✅ **컨트랙트 소유자가 수익을 인출하는 기능**
     function withdrawFunds(uint256 amount) public onlyOwner {
-        // ✅ 소유자만 출금 가능하도록 변경
         require(amount > 0, "Amount must be greater than zero");
         require(
             address(this).balance >= amount,
             "Insufficient funds in contract"
         );
 
-        (bool success, ) = payable(owner()).call{value: amount}(""); // ✅ 출금할 금액 지정
+        (bool success, ) = payable(owner()).call{value: amount}("");
         require(success, "Withdraw failed");
     }
 
@@ -105,25 +101,45 @@ contract MyNFT is
         _burn(tokenId);
         _burnedTokens[tokenId] = true;
         delete _tokenNames[tokenId];
-        delete nftPrices[tokenId]; // 판매 목록에서 삭제
+        delete nftPrices[tokenId];
 
         emit NFTBurned(msg.sender, tokenId);
     }
 
-    // ✅ **소유한 NFT 목록 반환 (`ERC721Enumerable` 활용)**
     function getOwnedNFTs(
         address owner
     ) public view returns (uint256[] memory) {
         uint256 balance = balanceOf(owner);
-        uint256[] memory ownedNFTs = new uint256[](balance);
+
+        if (balance == 0) {
+            return new uint256[](0); // ✅ 빈 배열 반환
+        }
+
+        // ✅ 일단 최대 크기의 임시 배열 생성
+        uint256[] memory tempNFTs = new uint256[](balance);
+        uint256 count = 0;
 
         for (uint256 i = 0; i < balance; i++) {
-            ownedNFTs[i] = tokenOfOwnerByIndex(owner, i);
+            uint256 tokenId = tokenOfOwnerByIndex(owner, i);
+
+            if (!_burnedTokens[tokenId]) {
+                // ✅ 소각된 NFT는 리스트에서 제외
+                tempNFTs[count] = tokenId;
+                count++;
+            }
         }
+
+        // ✅ 실제 보유한 NFT 개수에 맞게 배열 크기 조정
+        uint256[] memory ownedNFTs = new uint256[](count);
+        for (uint256 j = 0; j < count; j++) {
+            ownedNFTs[j] = tempNFTs[j];
+        }
+
         return ownedNFTs;
     }
 
-    // ✅ **NFT 가격 변경 기능 추가**
+    event Error(string message, bytes data); // 오류 로그 이벤트
+    // ✅ **NFT 가격 변경 기능**
     function updateNFTPrice(uint256 tokenId, uint256 newPrice) public {
         require(
             ownerOf(tokenId) == msg.sender,
@@ -136,7 +152,7 @@ contract MyNFT is
         emit NFTPriceUpdated(tokenId, newPrice);
     }
 
-    // ✅ **NFT 판매 등록 기능 (이 부분을 추가!)**
+    // ✅ **NFT 판매 등록**
     function listNFTForSale(uint256 tokenId, uint256 price) public {
         require(
             ownerOf(tokenId) == msg.sender,
@@ -145,21 +161,25 @@ contract MyNFT is
         require(!_burnedTokens[tokenId], "NFT is burned");
         require(price > 0, "Price must be greater than 0");
 
-        nftPrices[tokenId] = price; // ✅ NFT 가격 저장 (판매 등록)
-        emit NFTListedForSale(tokenId, price); // ✅ 이벤트 발생
+        nftPrices[tokenId] = price;
+        emit NFTListedForSale(tokenId, price);
     }
 
-    // ✅ **NFT 구매 기능**
+    // ✅ **NFT 구매 기능 (가격 초기화 문제 해결)**
     function buyNFT(uint256 tokenId) public payable {
         require(nftPrices[tokenId] > 0, "NFT is not for sale");
         require(msg.value >= nftPrices[tokenId], "Insufficient payment");
 
         address seller = ownerOf(tokenId);
+
+        // 🔥 가격을 먼저 저장 후 초기화 (버그 방지)
+        uint256 price = nftPrices[tokenId];
+        nftPrices[tokenId] = 0; // ✅ 판매 완료 후 가격 초기화
+
         _transfer(seller, msg.sender, tokenId);
 
-        // 판매 대금 전송
-        payable(seller).transfer(msg.value);
-        nftPrices[tokenId] = 0; // 판매 완료 후 가격 삭제
+        // ✅ 판매 대금 전송
+        payable(seller).transfer(price);
 
         emit NFTPurchased(tokenId, msg.sender);
     }

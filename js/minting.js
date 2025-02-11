@@ -1,4 +1,4 @@
-const contractAddress = "0xe3915F828712F04E4de1ffBF35f47b2517B2F5A4"; // 최신 컨트랙트 주소
+const contractAddress = "0xD85944D670c1d3fA86650862982D27e976EeD02B";
 const PINATA_JWT = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiJiNTk2Y2MyYS01NDY2LTQyNGItYjRlMC03OTVkMTIzNGI5ODAiLCJlbWFpbCI6Im9tajk5MDhAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInBpbl9wb2xpY3kiOnsicmVnaW9ucyI6W3siZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjEsImlkIjoiRlJBMSJ9LHsiZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjEsImlkIjoiTllDMSJ9XSwidmVyc2lvbiI6MX0sIm1mYV9lbmFibGVkIjpmYWxzZSwic3RhdHVzIjoiQUNUSVZFIn0sImF1dGhlbnRpY2F0aW9uVHlwZSI6InNjb3BlZEtleSIsInNjb3BlZEtleUtleSI6IjhmNDJiOGI4ZjE3MDFkOGM2ZGVhIiwic2NvcGVkS2V5U2VjcmV0IjoiNWM3MjE5ZDJmN2U5MzA3MTFlYTA0NjQyNDM3OTBhZTU5MThmZTU4NDY4MGUxNGNmMmI5OWJkZmNiMGI5YTllMCIsImV4cCI6MTc3MDM1MzkwM30.qCRw21knqdTqWg6rTb3_ujnnOyl-Wz0FpOLoV7BN2B0"; // Pinata JWT (환경 변수 사용 권장)
 
 const contractABI = [
@@ -43,7 +43,6 @@ const contractABI = [
 let web3;
 let contract;
 
-// ✅ **MetaMask 연결**
 async function connectWallet() {
   if (!window.ethereum) {
     alert("MetaMask를 설치하세요!");
@@ -65,7 +64,6 @@ async function connectWallet() {
   }
 }
 
-// ✅ **IPFS 업로드 (이미지 & 메타데이터)**
 async function uploadToIPFSWithMetadata(file, name, description) {
   const formData = new FormData();
   formData.append("file", file);
@@ -73,7 +71,6 @@ async function uploadToIPFSWithMetadata(file, name, description) {
   try {
     console.log("📌 [Debug] IPFS 이미지 업로드 시작...");
 
-    // 1️⃣ 이미지 업로드
     const response = await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS", {
       method: "POST",
       headers: { "Authorization": PINATA_JWT },
@@ -91,7 +88,6 @@ async function uploadToIPFSWithMetadata(file, name, description) {
 
     const imageUrl = `https://gateway.pinata.cloud/ipfs/${data.IpfsHash}`;
 
-    // 2️⃣ 메타데이터 JSON 생성
     const metadata = {
       name: name || "NFT 이름",
       description: description || "NFT 설명",
@@ -100,7 +96,6 @@ async function uploadToIPFSWithMetadata(file, name, description) {
 
     console.log("📌 [Debug] 생성된 메타데이터:", metadata);
 
-    // 3️⃣ 메타데이터 IPFS 업로드
     const metadataResponse = await fetch("https://api.pinata.cloud/pinning/pinJSONToIPFS", {
       method: "POST",
       headers: {
@@ -125,7 +120,6 @@ async function uploadToIPFSWithMetadata(file, name, description) {
   }
 }
 
-// ✅ **파일 업로드 버튼 클릭 이벤트**
 document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("uploadButton").addEventListener("click", async () => {
         console.log("✅ [Debug] 업로드 버튼 클릭됨!");
@@ -144,7 +138,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         document.getElementById("result").innerText = "이미지 및 메타데이터 업로드 중...";
         
-        // ✅ IPFS 업로드 시작
         const metadataURI = await uploadToIPFSWithMetadata(fileInput.files[0], name, description);
         
         if (metadataURI) {
@@ -162,7 +155,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-// ✅ **NFT 민팅 함수**
 async function mintNFT() {
   console.log("✅ [Debug] mintNFT() 함수 실행됨!");
 
@@ -197,7 +189,6 @@ async function mintNFT() {
   const name = document.getElementById("nftName").value.trim() || "Default NFT Name";
   const description = document.getElementById("description").value.trim();
 
-  // ✅ 메타데이터 업로드 실행
   const metadataURI = await uploadToIPFSWithMetadata(fileInput.files[0], name, description);
   console.log("📌 [Debug] 생성된 NFT 메타데이터 URI:", metadataURI);
 
