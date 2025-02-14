@@ -80,14 +80,21 @@
 </nav>
 
 <main class="container my-5">
-    <h2 class="mt-4">내 NFT 목록</h2>
-    <button id="loadNFTsBtn" class="btn btn-success mb-3" onclick="loadMyNFTs()">내 NFT 불러오기</button>
+    <!-- ✅ 일반적인 스킨(ERC-20)과 특별한 스킨(NFT) 구분 -->
+    <h2 class="mt-4">내 자산 관리</h2>
+    <button id="loadNFTsBtn" class="btn btn-success mb-3">🌟 내 특별한 스킨(NFT) 보기</button>
+    <button id="loadSkinsBtn" class="btn btn-primary mb-3">🎲 내 일반적인 스킨(ERC-20) 보기</button>
 
     <p id="status"></p>
 
-    <!-- NFT 목록이 표시될 컨테이너 -->
+    <!-- ✅ NFT 및 스킨 목록을 표시할 컨테이너 -->
+    <h3>📜 내 NFT 목록</h3>
     <div class="row" id="nftContainer"></div>
+
+    <h3>🎲 내 일반적인 스킨 목록</h3>
+    <div class="row" id="skinContainer"></div>
 </main>
+
 
 <!-- ✅ 관리자용 출금 기능 -->
 <script>
@@ -222,8 +229,6 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
 <!-- Web3.js -->
 <script src="./js/manage.js"></script>
-
-
 
 </body>
 </html>

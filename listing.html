@@ -189,7 +189,6 @@
         </div>
     </div>  
 
-    <!-- 구매하기 모달창 준비 -->
     <div class="modal" id="myModalPurchase">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -218,6 +217,13 @@
                     <label for="ownerAddress">소유자 :</label>
                     <input type="text" class="form-control" id="ownerAddress" disabled/>
                 </div>
+                <!-- ✅ 계정 선택 드롭다운 추가 -->
+                <div class="form-group mt-3">
+                    <label for="accountSelector">구매할 계정 선택:</label>
+                    <select id="accountSelector" class="form-control">
+                        <option value="">MetaMask에서 계정 불러오는 중...</option>
+                    </select>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
@@ -226,6 +232,7 @@
             </div>
         </div>
     </div>  
+    
 
     
     

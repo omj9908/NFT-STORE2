@@ -1,4 +1,4 @@
-const contractAddress = "0xD85944D670c1d3fA86650862982D27e976EeD02B"; 
+const contractAddress = "0x2DE507FfC038eFc92C50Bc7Cf188fea546DaE64A"; 
 const contractABI = [
   {
     "inputs": [],
@@ -82,16 +82,74 @@ const contractABI = [
 
 let web3;
 let contract;
+let currentAccount = null;
 
-async function connectWallet() {
+
+async function connectWallet(showPopup = false) {
   if (!window.ethereum) {
-    alert("MetaMask를 설치하세요!");
+    alert("❌ MetaMask가 설치되지 않았습니다.");
     return null;
   }
-  web3 = new Web3(window.ethereum);
-  await window.ethereum.request({ method: "eth_requestAccounts" });
-  contract = new web3.eth.Contract(contractABI, contractAddress);
+
+  try {
+    if (showPopup) {
+      // ✅ MetaMask 로그인 창 띄우기 (사용자가 계정을 선택할 수 있도록)
+      await window.ethereum.request({ method: "wallet_requestPermissions", params: [{ eth_accounts: {} }] });
+    }
+
+    // ✅ 현재 계정 정보 가져오기 (로그인 팝업 없이)
+    const selectedAccounts = await window.ethereum.request({ method: "eth_accounts" });
+
+    if (!selectedAccounts || selectedAccounts.length === 0) {
+      alert("❌ MetaMask 계정이 연결되지 않았습니다.");
+      return null;
+    }
+
+    const selectedAccount = selectedAccounts[0];
+
+    if (currentAccount !== selectedAccount) {
+      console.log(`🔄 MetaMask 계정 변경 감지! 이전 계정: ${currentAccount}, 새 계정: ${selectedAccount}`);
+      currentAccount = selectedAccount;
+      updateUIAccount(); // UI 업데이트
+    } else {
+      console.log(`✅ 동일한 계정 사용 중: ${currentAccount}`);
+    }
+
+    web3 = new Web3(window.ethereum);
+    contract = new web3.eth.Contract(contractABI, contractAddress);
+
+    return selectedAccount;
+  } catch (error) {
+    console.error("❌ MetaMask 연결 실패:", error);
+    return null;
+  }
 }
+
+function updateUIAccount() {
+  const accountElement = document.getElementById("currentAccount");
+  if (accountElement) {
+    accountElement.innerText = `현재 계정: ${currentAccount || "연결되지 않음"}`;
+  }
+}
+
+// ✅ MetaMask 계정 변경 감지
+if (window.ethereum) {
+  window.ethereum.on("accountsChanged", async function (newAccounts) {
+    if (!newAccounts || newAccounts.length === 0) {
+      console.log("❌ MetaMask 계정이 로그아웃됨.");
+      currentAccount = null;
+      updateUIAccount();
+      return;
+    }
+
+    console.log("🔄 MetaMask 계정 변경 감지됨:", newAccounts[0]);
+
+    currentAccount = newAccounts[0];
+    updateUIAccount();
+    loadMyNFTs(); // 계정 변경 시 자동으로 내 NFT 불러오기
+  });
+}
+
 
 async function fetchImageFromMetadata(tokenURI) {
   console.log(`🔍 Fetching metadata from: ${tokenURI}`);
@@ -130,127 +188,90 @@ async function fetchImageFromMetadata(tokenURI) {
 }
 
 async function loadMyNFTs() {
-  await connectWallet();
-  const accounts = await web3.eth.getAccounts();
-  const nftContainer = document.getElementById("nftContainer");
-  nftContainer.innerHTML = "";
-  document.getElementById("status").innerText = "NFT 불러오는 중...";
+  // ✅ 현재 계정 가져오기 (팝업 없이 확인)
+  let userAddress = await connectWallet(false);
+
+  // ✅ MetaMask 로그인 여부 확인
+  if (!userAddress) {
+    alert("❌ MetaMask에 로그인해야 NFT를 불러올 수 있습니다.");
+    return;
+  }
+
+  console.log(`🛍️ 현재 계정(${userAddress})의 NFT 목록 불러오기...`);
 
   try {
-      // ✅ 올바르게 사용자의 주소를 매개변수로 전달하여 호출!
-      let nftList = await contract.methods.getOwnedNFTs(accounts[0]).call();
+    const nftList = await contract.methods.getOwnedNFTs(userAddress).call();
+    console.log(`🛍️ 내 NFT 목록:`, nftList);
 
-      console.log(`🛍️ 내 NFT 목록:`, nftList); // ✅ 디버깅 로그 추가
+    const nftContainer = document.getElementById("nftContainer");
+    nftContainer.innerHTML = "";
 
-      if (!Array.isArray(nftList)) {
-          console.error("❌ Web3.js가 예상한 배열 형식이 아닙니다:", nftList);
-          nftList = []; // 강제로 빈 배열 설정
-      }
+    if (!Array.isArray(nftList) || nftList.length === 0) {
+      document.getElementById("status").innerText = "소유한 NFT가 없습니다.";
+      return;
+    }
 
-      if (nftList.length === 0) {
-          document.getElementById("status").innerText = "소유한 NFT가 없습니다.";
-          return;
-      }
+    for (let tokenId of nftList) {
+      try {
+        const nft = await contract.methods.getNFTInfo(tokenId).call();
+        console.log(`📌 NFT ${tokenId} 정보:`, nft);
 
-      document.getElementById("status").innerText = "";
+        let metadata = {
+          imageUrl: nft.tokenURI.startsWith("ipfs://")
+            ? nft.tokenURI.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/")
+            : nft.tokenURI,
+          description: "설명 없음"
+        };
 
-      for (let tokenId of nftList) {
-          try {
-              const nft = await contract.methods.getNFTInfo(tokenId).call();
-              console.log(`📌 NFT ${tokenId} 정보:`, nft);
-
-              let metadata = { 
-                  imageUrl: "https://dummyimage.com/250x250/cccccc/000000.png&text=No+Image", 
-                  description: "설명이 없습니다." 
-              };
-
-              if (nft.tokenURI) {
-                  console.log(`🌍 Original tokenURI: ${nft.tokenURI}`);
-
-                  if (nft.tokenURI.startsWith("ipfs://") || nft.tokenURI.endsWith(".json") || nft.tokenURI.includes("pinata")) {
-                      metadata = await fetchImageFromMetadata(nft.tokenURI);
-                  } else {
-                      metadata.imageUrl = nft.tokenURI;
-                  }
-              }
-
-              const priceInEther = nft.price ? web3.utils.fromWei(nft.price, "ether") : "판매되지 않음";
-
-              const nftElement = document.createElement("div");
-              nftElement.classList.add("col-md-4", "mb-4");
-
-              nftElement.innerHTML = `
-                  <div class="card shadow-sm">
-                      <img src="${metadata.imageUrl}" class="card-img-top" 
-                          onerror="this.onerror=null;this.src='https://dummyimage.com/250x250/cccccc/000000.png&text=No+Image'">
-                      <div class="card-body text-center">
-                          <h5 class="card-title">NFT #${tokenId} - ${nft.tokenName || "이름 없음"}</h5>
-                          <p><b>판매 가격:</b> ${priceInEther} ETH</p>
-                          <p><b>설명:</b> ${metadata.description}</p>
-                          <div class="d-grid gap-2">
-                              <button class="btn btn-info" onclick="viewNFTDetails(${tokenId})">세부정보</button>
-                              <button class="btn btn-primary" onclick="openNameChangeModal(${tokenId})">이름 변경</button>
-                              <button class="btn btn-warning" onclick="openPriceChangeModal(${tokenId}, ${nft.price || 0})">가격 변경</button>
-                              <button class="btn btn-danger" onclick="burnNFT(${tokenId})">폐기</button>
-                              ${nft.price == 0 
-                ? `<button class="btn btn-success" onclick="listNFTForSale(${tokenId})">판매 등록</button>` 
-                : ""
-              }
-                          </div>
-                      </div>
-                  </div>
-              `;
-
-              nftContainer.appendChild(nftElement);
-          } catch (error) {
-              console.error(`❌ NFT 정보 조회 오류:`, error);
+        // ✅ 메타데이터 로드
+        try {
+          const response = await fetch(nft.tokenURI);
+          if (response.ok) {
+            const metadataJson = await response.json();
+            metadata.imageUrl = metadataJson.image || metadata.imageUrl;
+            metadata.description = metadataJson.description || metadata.description;
           }
+        } catch (error) {
+          console.error(`❌ NFT 메타데이터 로드 오류:`, error);
+        }
+
+        const priceInEther = nft.price > 0 ? web3.utils.fromWei(nft.price, "ether") : "판매되지 않음";
+
+        // ✅ NFT 카드 생성
+        const nftElement = document.createElement("div");
+        nftElement.classList.add("col-md-4", "mb-4");
+
+        nftElement.innerHTML = `
+          <div class="card shadow-sm">
+            <img src="${metadata.imageUrl}" class="card-img-top">
+            <div class="card-body text-center">
+              <h5 class="card-title">NFT #${tokenId} - ${nft.tokenName || "이름 없음"}</h5>
+              <p><b>판매 가격:</b> ${priceInEther} ETH</p>
+              <p><b>설명:</b> ${metadata.description}</p>
+              <div class="d-grid gap-2">
+                <button class="btn btn-info" onclick="viewNFTDetails(${tokenId})">세부정보</button>
+                <button class="btn btn-primary" onclick="openNameChangeModal(${tokenId})">이름 변경</button>
+                <button class="btn btn-warning" onclick="openPriceChangeModal(${tokenId}, ${nft.price || 0})">가격 변경</button>
+                <button class="btn btn-danger" onclick="burnNFT(${tokenId})">폐기</button>
+                ${nft.price == 0 
+                  ? `<button class="btn btn-success" onclick="listNFTForSale(${tokenId})">판매 등록</button>` 
+                  : ""
+                }
+              </div>
+            </div>
+          </div>
+        `;
+
+        nftContainer.appendChild(nftElement);
+      } catch (error) {
+        console.error(`❌ NFT 정보 조회 오류 (ID: ${tokenId}):`, error);
       }
+    }
   } catch (error) {
-      console.error("❌ 소유한 NFT 조회 오류:", error);
-      document.getElementById("status").innerText = "NFT 조회 오류 발생!";
+    console.error("❌ [오류] 내 NFT 목록 조회 실패:", error);
+    document.getElementById("status").innerText = "NFT 조회 오류 발생!";
   }
 }
-
-
-
-document.addEventListener("DOMContentLoaded", function () {
-  const withdrawButton = document.getElementById("withdrawButton");
-
-  if (withdrawButton) {
-      withdrawButton.addEventListener("click", async function () {
-          await connectWallet();
-          const accounts = await web3.eth.getAccounts();
-
-          try {
-              const owner = await contract.methods.owner().call();
-              if (accounts[0].toLowerCase() !== owner.toLowerCase()) {
-                  alert("출금 실패! 컨트랙트 소유자만 가능합니다.");
-                  return;
-              }
-
-              let amountToWithdraw = prompt("출금할 금액을 ETH 단위로 입력하세요:", "1");
-              if (!amountToWithdraw || isNaN(amountToWithdraw) || parseFloat(amountToWithdraw) <= 0) {
-                  alert("올바른 출금 금액을 입력하세요!");
-                  return;
-              }
-
-              const withdrawAmount = web3.utils.toWei(amountToWithdraw, "ether");
-
-              await contract.methods.withdrawFunds(withdrawAmount).send({
-                  from: accounts[0],
-                  gas: 300000,
-                  gasPrice: await web3.eth.getGasPrice()
-              });
-
-              alert(`✅ ${amountToWithdraw} ETH가 컨트랙트에서 출금되었습니다.`);
-          } catch (error) {
-              console.error("❌ 출금 오류:", error);
-              alert("출금 실패! 컨트랙트에 잔액이 있는지 확인하세요.");
-          }
-      });
-  }
-});
 
 
 async function viewNFTDetails(tokenId) {
@@ -492,4 +513,31 @@ async function confirmPriceChange() {
   }
 }
 
+document.addEventListener("DOMContentLoaded", async function () {
+  console.log("✅ 문서가 로드됨!");
 
+  // ✅ 현재 계정 정보만 가져오기 (팝업 없이)
+  currentAccount = await connectWallet(false);
+  updateUIAccount();
+
+  // ✅ '내 NFT 불러오기' 버튼 이벤트 추가
+  const loadNFTsButton = document.getElementById("loadNFTsBtn");
+  if (loadNFTsButton) {
+    loadNFTsButton.addEventListener("click", async () => {
+      console.log("🛍️ '내 NFT 불러오기' 버튼 클릭됨!");
+      
+      // ✅ 버튼을 눌렀을 때만 로그인 창이 뜨도록 수정
+      currentAccount = await connectWallet(true);
+      
+      if (currentAccount) {
+        await loadMyNFTs();
+      } else {
+        alert("❌ MetaMask 계정이 연결되지 않았습니다.");
+      }
+    });
+
+    console.log("✅ '내 NFT 불러오기' 버튼에 이벤트 추가됨!");
+  } else {
+    console.warn("⚠️ '내 NFT 불러오기' 버튼을 찾을 수 없습니다! HTML 파일을 확인하세요.");
+  }
+});

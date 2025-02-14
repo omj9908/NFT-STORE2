@@ -46,6 +46,21 @@ contract MyNFT is ERC721URIStorage, ERC721Enumerable, Ownable {
         return newTokenId;
     }
 
+    // ✅ **특별한 스킨(NFT) 민팅**
+    function mintSpecialSkin(
+        address to,
+        string memory nftTokenURI
+    ) public onlyOwner returns (uint256) {
+        _tokenIds.increment(); // ✅ 올바른 증가 방식
+        uint256 newTokenId = _tokenIds.current(); // ✅ 현재 ID 가져오기
+
+        _safeMint(to, newTokenId);
+        _setTokenURI(newTokenId, nftTokenURI);
+
+        emit NFTMinted(to, newTokenId, nftTokenURI);
+        return newTokenId;
+    }
+
     // ✅ **NFT 정보 조회 함수**
     function getNFTInfo(
         uint256 tokenId
@@ -110,31 +125,24 @@ contract MyNFT is ERC721URIStorage, ERC721Enumerable, Ownable {
         address owner
     ) public view returns (uint256[] memory) {
         uint256 balance = balanceOf(owner);
+        uint256 count = 0;
 
         if (balance == 0) {
-            return new uint256[](0); // ✅ 빈 배열 반환
+            return new uint256[](0);
         }
 
-        // ✅ 일단 최대 크기의 임시 배열 생성
-        uint256[] memory tempNFTs = new uint256[](balance);
-        uint256 count = 0;
+        uint256[] memory ownedNFTs = new uint256[](balance); // ✅ 한 번만 배열 할당
 
         for (uint256 i = 0; i < balance; i++) {
             uint256 tokenId = tokenOfOwnerByIndex(owner, i);
 
             if (!_burnedTokens[tokenId]) {
-                // ✅ 소각된 NFT는 리스트에서 제외
-                tempNFTs[count] = tokenId;
+                ownedNFTs[count] = tokenId;
                 count++;
             }
         }
 
-        // ✅ 실제 보유한 NFT 개수에 맞게 배열 크기 조정
-        uint256[] memory ownedNFTs = new uint256[](count);
-        for (uint256 j = 0; j < count; j++) {
-            ownedNFTs[j] = tempNFTs[j];
-        }
-
+        // ✅ 배열 크기를 조정하지 않고 반환 (필요 없는 부분 제거)
         return ownedNFTs;
     }
 

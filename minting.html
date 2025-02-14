@@ -72,7 +72,19 @@
 
     <div class="container my-5">
         <div class="box-body">
-            <!-- NFT 민팅 폼 -->
+            <!-- ✅ 일반적인 스킨(ERC-20) 보유량 확인 -->
+            <h3>🎲 내 일반적인 스킨(ERC-20) 보유량</h3>
+            <p id="redDiceBalance">🔴 Red Dice 보유량: 0</p>
+            <button class="btn btn-info" id="checkSkinBalance">🎲 스킨 보유량 확인</button>
+
+
+            <!-- ✅ 일반적인 스킨(ERC-20) 구매 -->
+            <h3>일반적인 스킨 구매</h3>
+            <button class="btn btn-primary" id="buyRedDice">🔴 Red Dice (ERC-20) 구매</button>
+            <button class="btn btn-primary" id="buyBlueDice">🔵 Blue Dice (ERC-20) 구매</button>
+
+            <!-- ✅ NFT 민팅 폼 -->
+            <h3 class="mt-4">특별한 스킨(NFT) 민팅</h3>
             <div class="col-12">
                 <input type="text" class="form-control" id="recipientAddress" placeholder="NFT를 받을 지갑 주소 입력">
             </div>
@@ -82,27 +94,24 @@
             </div>
 
             <div class="col-12 py-3 my-3">
-                <input type="text" class="form-control" id="description" placeholder="NFT 설명 입력">
+                <textarea class="form-control" id="description" placeholder="NFT 설명 입력"></textarea>
             </div>
 
             <!-- 이미지 업로드 -->
             <div class="col-12 py-3 my-3">
                 <div class="input-group input-group-sm">
                     <input type="file" class="form-control" name="upload" id="upload">
-                    <span class="input-group-btn">
-                        <button class="btn btn-primary" id="uploadButton">업로드</button>
-                    </span>
+                    <button class="btn btn-primary" id="uploadButton">📤 이미지 업로드</button>
                 </div>
             </div>
 
-            <!-- 결과 표시 -->
             <div class="col-12 py-3 my-3">
-                <div class="form-control" id="result"></div>
+                <div class="form-control" id="result">IPFS 링크가 여기에 표시됩니다.</div>
             </div>
 
             <!-- NFT 민팅 버튼 -->
             <div>
-                <button class="btn btn-danger" id="mintButton">토큰 민팅</button>
+                <button class="btn btn-danger" id="mintButton">🌟 NFT 민팅</button>
             </div>
 
             <!-- 상태 메시지 -->
